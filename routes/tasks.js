@@ -1,12 +1,12 @@
 const express = require("express");
 const Task = require("../models/Task");
 const { asyncHandler } = require("../middleware/errorHandler");
-const { authecateToken } = require("../middleware/auth");
+const { authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
 
 // Apply authentication middleware to all routes
-router.use(authecateToken);
+router.use(authenticateToken);
 
 // @route GET /api/tasks
 // @desc Get all tasks for the authenticated user
