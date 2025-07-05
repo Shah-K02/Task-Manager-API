@@ -78,4 +78,4 @@ userSchema.index({ email: 1 }, { unique: true });
 // Index for username
 userSchema.index({ username: 1 }, { unique: true });
 
-module.exports = mongoose.model("User", userSchema);
+export default mongoose.model("User", userSchema);

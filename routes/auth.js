@@ -1,7 +1,7 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-const { asyncHandler } = require("../middleware/errorHandler");
+import express from "express";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
@@ -115,7 +115,7 @@ router.post(
 // @access Private
 router.get(
   "/profile",
-  require("../middleware/auth"),
+  import("../middleware/auth").authenticateToken,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -138,4 +138,4 @@ router.get(
   })
 );
 
-module.exports = router;
+export default router;

@@ -1,7 +1,7 @@
-const express = require("express");
-const Task = require("../models/Task");
-const { asyncHandler } = require("../middleware/errorHandler");
-const { authenticateToken } = require("../middleware/auth");
+import express from "express";
+import Task from "../models/Task.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -190,4 +190,4 @@ router.get(
   })
 );
 
-module.exports = router;
+export default router;

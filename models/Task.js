@@ -89,4 +89,4 @@ taskSchema.methods.isOverdue = function () {
     this.dueDate && this.dueDate < new Date() && this.status !== "completed"
   );
 };
-module.exports = mongoose.model("Task", taskSchema);
+export default mongoose.model("Task", taskSchema);

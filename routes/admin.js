@@ -1,8 +1,8 @@
-const express = require("express");
-const Task = require("../models/Task");
-const User = require("../models/User");
-const { asyncHandler } = require("../middleware/errorHandler");
-const { requireAdmin, authenticateToken } = require("../middleware/auth");
+import express from "express";
+import Task from "../models/Task.js";
+import User from "../models/User.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import { requireAdmin, authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -239,4 +239,4 @@ router.delete(
   })
 );
 
-module.exports = router;
+export default router;
