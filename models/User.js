@@ -5,27 +5,36 @@ const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: [true, "Username is required"],
       unique: true,
       trim: true,
-      minlength: 3,
+      minlength: [3, "Username must be at least 3 characters long"],
+      maxlength: [30, "Username must not exceed 30 characters"],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
+      match: [
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Please enter a valid email address",
+      ],
     },
     password: {
       type: String,
-      required: true,
-      minlength: 6,
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters long"],
     },
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -37,17 +46,36 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Hash password with cost of 12
+    const hashedPassword = await bcrypt.hash(this.password, 12);
+    this.password = hashedPassword;
     next();
   } catch (err) {
     next(err);
   }
 });
 
-// Add method to compare passwords
-userSchema.methods.comparePassword = function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+// Add method to check passwords
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Remove sensitive information before sending user data
+userSchema.methods.toJSON = function () {
+  const userObject = this.toObject();
+  delete userObject.password; // remove password
+  delete userObject.__v; // remove version key
+  return userObject;
+};
+
+// Static method to find user by email
+userSchema.statics.findByEmail = async function (email) {
+  return await this.findOne({ email: email.toLowerCase() });
+};
+
+// Index for faster querying
+userSchema.index({ email: 1 }, { unique: true });
+// Index for username
+userSchema.index({ username: 1 }, { unique: true });
 
 module.exports = mongoose.model("User", userSchema);
