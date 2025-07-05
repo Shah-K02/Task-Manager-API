@@ -1,6 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
+const connectDB = require("./config/database");
 
 dotenv.config();
 
@@ -12,8 +12,8 @@ const app = express();
 app.use(express.json()); // Parse JSON bodies
 
 // Routes
-app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/tasks", require("./routes/taskRoutes"));
+app.use("/api/users", require("./routes/admin"));
+app.use("/api/tasks", require("./routes/tasks"));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
