@@ -7,7 +7,7 @@ require("dotenv").config();
 const authRoutes = require("./routes/auth");
 const taskRoutes = require("./routes/tasks");
 const adminRoutes = require("./routes/admin");
-const errorHandler = require("./middleware/errorHandler");
+const { errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 
