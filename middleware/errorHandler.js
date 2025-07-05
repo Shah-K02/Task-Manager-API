@@ -1,5 +1,5 @@
-const errorHandler = (err, req, res, next) => {
-  console.error("Error:", err);
+const errorHandler = (error, req, res, next) => {
+  console.error("Error:", error);
 
   // Default error
   let statusCode = 500;
@@ -10,17 +10,17 @@ const errorHandler = (err, req, res, next) => {
   if (error.name === "ValidationError") {
     statusCode = 400;
     message = "Validation Error";
-    errors = Object.values(err.errors).map((error) => ({
-      field: error.path,
-      message: error.message,
+    errors = Object.values(error.errors).map((err) => ({
+      field: err.path,
+      message: err.message,
     }));
   }
 
   // Mongoose duplicate key error
-  if (err.code === 11000) {
+  if (error.code === 11000) {
     statusCode = 400;
     message = "Duplicate Error";
-    const field = Object.keys(err.keyValue)[0];
+    const field = Object.keys(error.keyValue)[0];
     errors = [
       {
         field: field,
@@ -30,48 +30,49 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Mongoose cast error (invalid ObjectId)
-  if (err.name === "CastError") {
+  if (error.name === "CastError") {
     statusCode = 400;
     message = "Invalid ID Format";
     errors = [
       {
-        field: err.path,
+        field: error.path,
         message: "Invalid ID format",
       },
     ];
   }
 
   // JWT errors
-  if (err.name === "JsonWebTokenError") {
+  if (error.name === "JsonWebTokenError") {
     statusCode = 401;
     message = "Invalid token";
   }
 
-  if (err.name === "TokenExpiredError") {
+  if (error.name === "TokenExpiredError") {
     statusCode = 401;
     message = "Token expired";
   }
 
   // Custom error (if you throw custom errors)
-  if (err.statusCode) {
-    statusCode = err.statusCode;
-    message = err.message;
+  if (error.statusCode) {
+    statusCode = error.statusCode;
+    message = error.message;
   }
 
   // Send error response
   const errorResponse = {
     error: message,
     ...(errors && { errors }),
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
   };
 
   res.status(statusCode).json(errorResponse);
 };
 
-export default errorHandler;
-
-export function asyncHandler(fn) {
-  return function (req, res, next) {
+// Async error handler wrapper
+const asyncHandler = (fn) => {
+  return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
-}
+};
+
+module.exports = { errorHandler, asyncHandler };

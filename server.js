@@ -1,14 +1,13 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
-import helmet from "helmet";
-import dotenv from "dotenv";
-dotenv.config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const helmet = require("helmet");
+require("dotenv").config();
 
-import authRoutes from "./routes/auth.js";
-import taskRoutes from "./routes/tasks.js";
-import adminRoutes from "./routes/admin.js";
-import errorHandler from "./middleware/errorHandler.js";
+const authRoutes = require("./routes/auth");
+const taskRoutes = require("./routes/tasks");
+const adminRoutes = require("./routes/admin");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -19,8 +18,9 @@ app.use(cors());
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 // Request logging middleware
-app.use((req, _, next) => {
+app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
@@ -29,16 +29,18 @@ app.use((req, _, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/admin", adminRoutes);
+
 // Health check endpoint
-app.get("/health", (_, res) => {
+app.get("/health", (req, res) => {
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
   });
 });
+
 // Root endpoint
-app.get("/", (_, res) => {
+app.get("/", (req, res) => {
   res.json({
     message: "Task Manager API",
     version: "1.0.0",

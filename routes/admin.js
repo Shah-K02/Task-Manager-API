@@ -1,66 +1,35 @@
-import express from "express";
-import Task from "../models/Task.js";
-import User from "../models/User.js";
-import { asyncHandler } from "../middleware/errorHandler.js";
-import { requireAdmin, authenticateToken } from "../middleware/auth.js";
+const express = require("express");
+const Task = require("../models/taskModel");
+const User = require("../models/userModel");
+const {
+  authenticateToken,
+  requireAdmin,
+} = require("../middleware/authMiddlesware");
+const { asyncHandler } = require("../middleware/errorHandler");
 
-const router = express.Router();
+const adminRoutes = express.Router();
 
 // Apply authentication and admin middleware to all routes
-router.use(authenticateToken);
-router.use(requireAdmin);
+adminRoutes.use(authenticateToken);
+adminRoutes.use(requireAdmin);
 
-// @route GET /api/admin/tasks
-// @desc Get all tasks (admin only)
-// @access Private (Admin)
-router.get(
+// @route   GET /api/admin/tasks
+// @desc    Get all tasks (admin only)
+// @access  Private (Admin)
+adminRoutes.get(
   "/tasks",
   asyncHandler(async (req, res) => {
     const { status, priority, page = 1, limit = 10 } = req.query;
 
     // Build query
     const query = {};
-    if (status) query.status = status;
-    if (priority) query.priority = priority;
 
-    // Pagination
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limit);
-    const skip = (pageNumber - 1) * limitNumber;
+    if (status) {
+      query.status = status;
+    }
 
-    // Execute query with user population
-    const tasks = await Task.find(query)
-      .populate("owner", "username email") // Populate owner details
-      .skip(skip)
-      .limit(limitNumber)
-      .sort({ createdAt: -1 }); // Sort by createdAt descending
-
-    const total = await Task.countDocuments(query);
-    res.json({
-      tasks,
-      pagination: {
-        page: pageNumber,
-        limit: limitNumber,
-        total,
-        pages: Math.ceil(total / limitNumber),
-      },
-    });
-  })
-);
-
-// @route GET /api/admin/users
-// @desc Get all users (admin only)
-// @access Private (Admin)
-router.get(
-  "/users",
-  asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10 } = req.query;
-
-    // Build query
-    const query = {};
-
-    if (role) {
-      query.role = role; // Filter by role if provided
+    if (priority) {
+      query.priority = priority;
     }
 
     // Pagination
@@ -68,14 +37,56 @@ router.get(
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
 
-    // Execute query with pagination
-    const users = await User.find(query)
-      .select("-password") // Exclude password from response
+    // Execute query with user population
+    const tasks = await Task.find(query)
+      .populate("owner", "username email")
+      .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limitNum)
-      .sort({ createdAt: -1 });
+      .limit(limitNum);
+
+    const total = await Task.countDocuments(query);
+
+    res.json({
+      tasks,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+      },
+    });
+  })
+);
+
+// @route   GET /api/admin/users
+// @desc    Get all users (admin only)
+// @access  Private (Admin)
+adminRoutes.get(
+  "/users",
+  asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, role } = req.query;
+
+    // Build query
+    const query = {};
+
+    if (role) {
+      query.role = role;
+    }
+
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Execute query
+    const users = await User.find(query)
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
 
     const total = await User.countDocuments(query);
+
     res.json({
       users,
       pagination: {
@@ -91,7 +102,7 @@ router.get(
 // @route   GET /api/admin/stats
 // @desc    Get system statistics (admin only)
 // @access  Private (Admin)
-router.get(
+adminRoutes.get(
   "/stats",
   asyncHandler(async (req, res) => {
     // User stats
@@ -171,7 +182,7 @@ router.get(
 // @route   PUT /api/admin/users/:id/status
 // @desc    Update user status (activate/deactivate)
 // @access  Private (Admin)
-router.put(
+adminRoutes.put(
   "/users/:id/status",
   asyncHandler(async (req, res) => {
     const { isActive } = req.body;
@@ -219,7 +230,7 @@ router.put(
 // @route   DELETE /api/admin/tasks/:id
 // @desc    Delete any task (admin only)
 // @access  Private (Admin)
-router.delete(
+adminRoutes.delete(
   "/tasks/:id",
   asyncHandler(async (req, res) => {
     const task = await Task.findById(req.params.id);
@@ -239,4 +250,4 @@ router.delete(
   })
 );
 
-export default router;
+module.exports = adminRoutes;

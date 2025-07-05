@@ -1,27 +1,30 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import User from "../models/User.js";
-import { asyncHandler } from "../middleware/errorHandler.js";
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
+const { asyncHandler } = require("../middleware/errorHandler");
 
 const router = express.Router();
 
 // Generate JWT token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: "1d", // Token valid for 1 day
+    expiresIn: "24h",
   });
 };
 
-// @route POST /api/auth/register
-// @desc Register a new user
-// @access Public
+// @route   POST /api/auth/register
+// @desc    Register a new user
+// @access  Public
 router.post(
   "/register",
   asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
     if (existingUser) {
       return res.status(400).json({
         error: "User already exists",
@@ -33,28 +36,33 @@ router.post(
     }
 
     // Create new user
-    const newUser = new User({ username, email, password });
-    await newUser.save();
+    const user = new User({
+      username,
+      email,
+      password,
+    });
 
-    // Generate JWT token
-    const token = generateToken(newUser._id);
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user._id);
 
     res.status(201).json({
       message: "User registered successfully",
       token,
       user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
       },
     });
   })
 );
 
-// @route POST /api/auth/login
-// @desc Login user
-// @access Public
+// @route   POST /api/auth/login
+// @desc    Login user
+// @access  Public
 router.post(
   "/login",
   asyncHandler(async (req, res) => {
@@ -63,13 +71,14 @@ router.post(
     // Validate input
     if (!email || !password) {
       return res.status(400).json({
-        error: "Invalid input",
+        error: "Missing credentials",
         message: "Email and password are required",
       });
     }
 
     // Find user by email
     const user = await User.findByEmail(email);
+
     if (!user) {
       return res.status(401).json({
         error: "Invalid credentials",
@@ -79,22 +88,23 @@ router.post(
 
     // Check if user is active
     if (!user.isActive) {
-      return res.status(403).json({
+      return res.status(401).json({
         error: "Account inactive",
-        message: "Your account is inactive. Please contact support.",
+        message: "Your account has been deactivated",
       });
     }
 
     // Check password
-    const isPasswordMatch = await user.comparePassword(password);
-    if (!isPasswordMatch) {
+    const isPasswordValid = await user.comparePassword(password);
+
+    if (!isPasswordValid) {
       return res.status(401).json({
         error: "Invalid credentials",
         message: "Invalid email or password",
       });
     }
 
-    // Generate JWT token
+    // Generate token
     const token = generateToken(user._id);
 
     res.json({
@@ -110,21 +120,13 @@ router.post(
   })
 );
 
-// @route GET /api/auth/profile
-// @desc Get user profile
-// @access Private
+// @route   GET /api/auth/profile
+// @desc    Get user profile
+// @access  Private
 router.get(
   "/profile",
-  import("../middleware/auth").authenticateToken,
+  require("../middleware/authMiddlesware").authenticateToken,
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({
-        error: "User not found",
-        message: "No user found with this ID",
-      });
-    }
-
     res.json({
       user: {
         id: req.user._id,
@@ -132,10 +134,9 @@ router.get(
         email: req.user.email,
         role: req.user.role,
         createdAt: req.user.createdAt,
-        updatedAt: req.user.updatedAt,
       },
     });
   })
 );
 
-export default router;
+module.exports = router;

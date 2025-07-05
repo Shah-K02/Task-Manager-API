@@ -1,32 +1,40 @@
-import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 
 // Middleware to authenticate JWT token
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1]; // Bearer token format
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
     if (!token) {
       return res.status(401).json({
         error: "Access denied",
-        message: "Access token is missing",
+        message: "No token provided",
       });
     }
 
-    // Verify the token
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find user by ID from the token
+    // Find user by ID
     const user = await User.findById(decoded.userId);
+
     if (!user) {
-      return res.status(404).json({
+      return res.status(401).json({
         error: "Access denied",
         message: "Invalid token - user not found",
       });
     }
 
-    // Add user information to the request object
+    if (!user.isActive) {
+      return res.status(401).json({
+        error: "Access denied",
+        message: "User account is inactive",
+      });
+    }
+
+    // Add user to request object
     req.user = user;
     next();
   } catch (error) {

@@ -4,9 +4,9 @@ const taskSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Title is required"],
+      required: [true, "Task title is required"],
       trim: true,
-      maxlength: [100, "Title cannot exceed 100 characters"],
+      maxlength: [100, "Task title cannot exceed 100 characters"],
     },
     description: {
       type: String,
@@ -15,7 +15,7 @@ const taskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "in progress", "done"],
+      enum: ["pending", "in-progress", "completed", "cancelled"],
       default: "pending",
     },
     priority: {
@@ -26,11 +26,10 @@ const taskSchema = new mongoose.Schema(
     dueDate: {
       type: Date,
       validate: {
-        validator: function (v) {
-          // Ensure dueDate is not in the past
-          return v ? v >= new Date() : true;
+        validator: function (value) {
+          return !value || value >= new Date();
         },
-        message: "Due date cannot be in the past",
+        message: "Due date must be in the future",
       },
     },
     owner: {
@@ -42,7 +41,7 @@ const taskSchema = new mongoose.Schema(
       {
         type: String,
         trim: true,
-        maxlength: [30, "Tag cannot exceed 30 characters"],
+        maxlength: [20, "Tag cannot exceed 20 characters"],
       },
     ],
     completedAt: {
@@ -50,16 +49,18 @@ const taskSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
+// Update completedAt when status changes to completed
 taskSchema.pre("save", function (next) {
-  // Automatically set completedAt if status is 'done'
-  if (this.isModified("status") && this.status === "done") {
-    this.completedAt = new Date();
-  } else if (this.isModified("status") && this.status !== "done") {
-    this.completedAt = null; // Reset completedAt if status changes from 'done'
+  if (this.isModified("status")) {
+    if (this.status === "completed" && !this.completedAt) {
+      this.completedAt = new Date();
+    } else if (this.status !== "completed") {
+      this.completedAt = undefined;
+    }
   }
   next();
 });
@@ -78,10 +79,6 @@ taskSchema.statics.findByOwner = function (ownerId) {
 taskSchema.statics.findByStatus = function (ownerId, status) {
   return this.find({ owner: ownerId, status }).sort({ createdAt: -1 });
 };
-// Static method to find tasks by tag
-taskSchema.statics.findByTag = function (ownerId, tag) {
-  return this.find({ owner: ownerId, tags: tag }).sort({ createdAt: -1 });
-};
 
 // Instance method to check if task is overdue
 taskSchema.methods.isOverdue = function () {
@@ -89,4 +86,5 @@ taskSchema.methods.isOverdue = function () {
     this.dueDate && this.dueDate < new Date() && this.status !== "completed"
   );
 };
-export default mongoose.model("Task", taskSchema);
+
+module.exports = mongoose.model("Task", taskSchema);

@@ -1,16 +1,16 @@
-import express from "express";
-import Task from "../models/Task.js";
-import { asyncHandler } from "../middleware/errorHandler.js";
-import { authenticateToken } from "../middleware/auth.js";
+const express = require("express");
+const Task = require("../models/taskModel");
+const { authenticateToken } = require("../middleware/authMiddlesware");
+const { asyncHandler } = require("../middleware/errorHandler");
 
 const router = express.Router();
 
 // Apply authentication middleware to all routes
 router.use(authenticateToken);
 
-// @route GET /api/tasks
-// @desc Get all tasks for the authenticated user
-// @access Private
+// @route   GET /api/tasks
+// @desc    Get all tasks for authenticated user
+// @access  Private
 router.get(
   "/",
   asyncHandler(async (req, res) => {
@@ -18,42 +18,49 @@ router.get(
 
     // Build query
     const query = { owner: req.user._id };
-    if (status) query.status = status;
-    if (priority) query.priority = priority;
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (priority) {
+      query.priority = priority;
+    }
 
     // Pagination
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limit);
-    const skip = (pageNumber - 1) * limitNumber;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
 
-    // Execute query#
+    // Execute query
     const tasks = await Task.find(query)
+      .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limitNumber)
-      .sort({ createdAt: -1 }); // Sort by createdAt descending
+      .limit(limitNum);
 
-    const totalTasks = await Task.countDocuments(query);
+    const total = await Task.countDocuments(query);
+
     res.json({
       tasks,
       pagination: {
-        page: pageNumber,
-        limit: limitNumber,
-        total: totalTasks,
-        pages: Math.ceil(totalTasks / limitNumber),
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
       },
     });
   })
 );
 
-// @route POST /api/tasks/:id
-// @desc Update a task by ID
-// @access Private
+// @route   GET /api/tasks/:id
+// @desc    Get single task by ID
+// @access  Private
 router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const task = await Task.findOne({
       _id: req.params.id,
-      owner: req.user._id, // Ensure user can only access their own tasks
+      owner: req.user._id,
     });
 
     if (!task) {
@@ -67,9 +74,9 @@ router.get(
   })
 );
 
-// @route POST /api/tasks
-// @desc Create a new task
-// @access Private
+// @route   POST /api/tasks
+// @desc    Create a new task
+// @access  Private
 router.post(
   "/",
   asyncHandler(async (req, res) => {
@@ -80,9 +87,9 @@ router.post(
       description,
       status,
       priority,
-      dueDate: dueDate ? new Date(dueDate) : null, // Convert to Date object if provided
-      owner: req.user._id, // Set the owner to the authenticated user
-      tags: tags || [], // Default to empty array if not provided
+      dueDate: dueDate ? new Date(dueDate) : undefined,
+      tags: tags || [],
+      owner: req.user._id,
     });
 
     await task.save();
@@ -94,16 +101,17 @@ router.post(
   })
 );
 
-// @route PUT /api/tasks/:id
-// @desc Update a task by ID
-// @access Private
+// @route   PUT /api/tasks/:id
+// @desc    Update a task
+// @access  Private
 router.put(
   "/:id",
   asyncHandler(async (req, res) => {
     const { title, description, status, priority, dueDate, tags } = req.body;
+
     const task = await Task.findOne({
       _id: req.params.id,
-      owner: req.user._id, // Ensure user can only update their own tasks
+      owner: req.user._id,
     });
 
     if (!task) {
@@ -112,14 +120,16 @@ router.put(
         message: "Task not found or you do not have permission to update it",
       });
     }
-    // Update task fields
-    task.title = title;
-    task.description = description;
-    task.status = status;
-    task.priority = priority;
-    task.dueDate = dueDate;
-    task.tags = tags;
-    // Save updated task
+
+    // Update fields
+    if (title !== undefined) task.title = title;
+    if (description !== undefined) task.description = description;
+    if (status !== undefined) task.status = status;
+    if (priority !== undefined) task.priority = priority;
+    if (dueDate !== undefined)
+      task.dueDate = dueDate ? new Date(dueDate) : null;
+    if (tags !== undefined) task.tags = tags;
+
     await task.save();
 
     res.json({
@@ -128,9 +138,10 @@ router.put(
     });
   })
 );
-// @route DELETE /api/tasks/:id
-// @desc Delete a task by ID
-// @access Private
+
+// @route   DELETE /api/tasks/:id
+// @desc    Delete a task
+// @access  Private
 router.delete(
   "/:id",
   asyncHandler(async (req, res) => {
@@ -154,9 +165,9 @@ router.delete(
   })
 );
 
-// @router GET /api/tasks/stats/summary
-// @desc Get task summary statistics for the authenticated user
-// @access Private
+// @route   GET /api/tasks/stats/summary
+// @desc    Get task statistics for user
+// @access  Private
 router.get(
   "/stats/summary",
   asyncHandler(async (req, res) => {
@@ -190,4 +201,4 @@ router.get(
   })
 );
 
-export default router;
+module.exports = router;
