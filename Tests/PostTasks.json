@@ -1,0 +1,182 @@
+[
+  {
+    "title": "Complete project",
+    "description": "Finish the task manager API",
+    "priority": "high",
+    "dueDate": "2025-12-31"
+  },
+  {
+    "title": "Write documentation",
+    "description": "Create API docs for users",
+    "priority": "medium",
+    "dueDate": "2025-12-15"
+  },
+  {
+    "title": "Fix bugs",
+    "description": "Resolve critical issues in production",
+    "priority": "high",
+    "dueDate": "2025-11-20"
+  },
+  {
+    "title": "Update dependencies",
+    "description": "Run npm audit fix",
+    "priority": "low",
+    "dueDate": "2025-10-01"
+  },
+  {
+    "title": "Design database schema",
+    "description": "Finalize Mongoose models",
+    "priority": "medium",
+    "dueDate": "2025-08-10"
+  },
+  {
+    "title": "Implement unit tests",
+    "description": "Write Jest test cases",
+    "priority": "high",
+    "dueDate": "2025-09-05"
+  },
+  {
+    "title": "Set up CI/CD",
+    "description": "Configure GitHub Actions",
+    "priority": "medium",
+    "dueDate": "2025-07-31"
+  },
+  {
+    "title": "Deploy to Heroku",
+    "description": "Push project to Heroku cloud",
+    "priority": "high",
+    "dueDate": "2025-08-15"
+  },
+  {
+    "title": "Add logging",
+    "description": "Implement request logging with morgan",
+    "priority": "low",
+    "dueDate": "2025-09-01"
+  },
+  {
+    "title": "Refactor codebase",
+    "description": "Clean up controller logic",
+    "priority": "medium",
+    "dueDate": "2025-09-10"
+  },
+  {
+    "title": "Create admin dashboard",
+    "description": "Build UI for admin role",
+    "priority": "high",
+    "dueDate": "2025-10-05"
+  },
+  {
+    "title": "Add user roles",
+    "description": "Implement role-based access",
+    "priority": "medium",
+    "dueDate": "2025-07-20"
+  },
+  {
+    "title": "Secure API",
+    "description": "Add helmet and CORS configuration",
+    "priority": "high",
+    "dueDate": "2025-07-25"
+  },
+  {
+    "title": "Implement rate limiting",
+    "description": "Prevent brute-force attacks",
+    "priority": "medium",
+    "dueDate": "2025-08-30"
+  },
+  {
+    "title": "Write README",
+    "description": "Add badges, usage examples",
+    "priority": "low",
+    "dueDate": "2025-08-01"
+  },
+  {
+    "title": "Prepare demo video",
+    "description": "Record usage walkthrough",
+    "priority": "low",
+    "dueDate": "2025-09-15"
+  },
+  {
+    "title": "Add email notifications",
+    "description": "Notify users on task status change",
+    "priority": "medium",
+    "dueDate": "2025-10-20"
+  },
+  {
+    "title": "Implement file upload",
+    "description": "Allow file attachments for tasks",
+    "priority": "medium",
+    "dueDate": "2025-10-25"
+  },
+  {
+    "title": "Enable search",
+    "description": "Add task filtering and search",
+    "priority": "high",
+    "dueDate": "2025-11-01"
+  },
+  {
+    "title": "Optimize queries",
+    "description": "Improve database performance",
+    "priority": "medium",
+    "dueDate": "2025-11-10"
+  },
+  {
+    "title": "Write integration tests",
+    "description": "End-to-end API testing",
+    "priority": "high",
+    "dueDate": "2025-11-20"
+  },
+  {
+    "title": "Configure environment variables",
+    "description": "Update .env.example",
+    "priority": "low",
+    "dueDate": "2025-08-05"
+  },
+  {
+    "title": "Add swagger docs",
+    "description": "Generate OpenAPI spec",
+    "priority": "medium",
+    "dueDate": "2025-08-15"
+  },
+  {
+    "title": "Set up PM2",
+    "description": "Manage process for production",
+    "priority": "low",
+    "dueDate": "2025-09-05"
+  },
+  {
+    "title": "Configure nginx",
+    "description": "Reverse proxy for Node.js app",
+    "priority": "low",
+    "dueDate": "2025-09-10"
+  },
+  {
+    "title": "Enable HTTPS",
+    "description": "Add SSL certificate",
+    "priority": "high",
+    "dueDate": "2025-10-01"
+  },
+  {
+    "title": "Add activity logs",
+    "description": "Track user actions",
+    "priority": "medium",
+    "dueDate": "2025-10-10"
+  },
+  {
+    "title": "Implement audit trail",
+    "description": "Log sensitive changes",
+    "priority": "medium",
+    "dueDate": "2025-10-15"
+  },
+  {
+    "title": "Write contributing guide",
+    "description": "Onboard new developers",
+    "priority": "low",
+    "dueDate": "2025-08-20"
+  },
+  {
+    "title": "Review pull requests",
+    "description": "Ensure code quality",
+    "priority": "medium",
+    "dueDate": "2025-09-25"
+  }
+]
