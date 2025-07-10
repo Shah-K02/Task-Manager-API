@@ -18,7 +18,7 @@
     "jwt",
     "task-manager"
   ],
-  "author": "Your Name",
+  "author": "Shah Kar",
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.1.0",
