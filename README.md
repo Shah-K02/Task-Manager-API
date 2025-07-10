@@ -138,6 +138,22 @@ curl -X GET http://localhost:3000/api/tasks \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
+## 📚 API Documentation with Swagger UI
+The API is fully documented using Swagger (OpenAPI) annotations directly in the route files.
+
+You can access the interactive API docs at:
+
+```bash
+Copy
+Edit
+http://localhost:3000/api-docs
+```
+This documentation provides detailed information on all endpoints, including request bodies, parameters, and response formats.
+
+Use the Swagger UI to explore and test the API interactively.
+
+To add or update the documentation, modify the JSDoc-style Swagger annotations in the respective route files (for example: routes/tasks.js, routes/auth.js).
+
 ## 🗂️ Project Structure
 
 ```
