@@ -3,11 +3,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 require("dotenv").config();
+const swaggerUi = require("swagger-ui-express");
 
 const authRoutes = require("./routes/auth");
 const taskRoutes = require("./routes/tasks");
 const adminRoutes = require("./routes/admin");
 const { errorHandler } = require("./middleware/errorHandler");
+const swaggerSpec = require("./swaggerSpec");
 
 const app = express();
 
@@ -29,6 +31,9 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/admin", adminRoutes);
+
+// Swagger documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health check endpoint
 app.get("/health", (req, res) => {

@@ -7,15 +7,122 @@ const {
 } = require("../middleware/authMiddlesware");
 const { asyncHandler } = require("../middleware/errorHandler");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Admin
+ *   description: Admin-only endpoints for managing users, tasks, and stats
+ *
+ * components:
+ *   schemas:
+ *     AdminTask:
+ *       allOf:
+ *         - $ref: '#/components/schemas/Task'
+ *       properties:
+ *         owner:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             username:
+ *               type: string
+ *             email:
+ *               type: string
+ *     AdminUser:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         username:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *         isActive:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *         updatedAt:
+ *           type: string
+ *     AdminUserUpdateStatus:
+ *       type: object
+ *       required:
+ *         - isActive
+ *       properties:
+ *         isActive:
+ *           type: boolean
+ *     Pagination:
+ *       type: object
+ *       properties:
+ *         page:
+ *           type: integer
+ *         limit:
+ *           type: integer
+ *         total:
+ *           type: integer
+ *         pages:
+ *           type: integer
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
 const adminRoutes = express.Router();
 
 // Apply authentication and admin middleware to all routes
 adminRoutes.use(authenticateToken);
 adminRoutes.use(requireAdmin);
 
-// @route   GET /api/admin/tasks
-// @desc    Get all tasks (admin only)
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /api/admin/tasks:
+ *   get:
+ *     summary: Get all tasks in the system (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Filter tasks by status
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *         description: Filter tasks by priority
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of all tasks with user info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tasks:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AdminTask'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+
 adminRoutes.get(
   "/tasks",
   asyncHandler(async (req, res) => {
@@ -58,9 +165,48 @@ adminRoutes.get(
   })
 );
 
-// @route   GET /api/admin/users
-// @desc    Get all users (admin only)
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: Get all users in the system (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *         description: Filter by user role
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AdminUser'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+
 adminRoutes.get(
   "/users",
   asyncHandler(async (req, res) => {
@@ -99,9 +245,30 @@ adminRoutes.get(
   })
 );
 
-// @route   GET /api/admin/stats
-// @desc    Get system statistics (admin only)
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /api/admin/stats:
+ *   get:
+ *     summary: Get system-wide stats (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: System statistics summary
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 stats:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+
 adminRoutes.get(
   "/stats",
   asyncHandler(async (req, res) => {
@@ -179,9 +346,49 @@ adminRoutes.get(
   })
 );
 
-// @route   PUT /api/admin/users/:id/status
-// @desc    Update user status (activate/deactivate)
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /api/admin/users/{id}/status:
+ *   put:
+ *     summary: Update user status (activate/deactivate)
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AdminUserUpdateStatus'
+ *     responses:
+ *       200:
+ *         description: User status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/AdminUser'
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: User not found
+ */
+
 adminRoutes.put(
   "/users/:id/status",
   asyncHandler(async (req, res) => {
@@ -227,9 +434,32 @@ adminRoutes.put(
   })
 );
 
-// @route   DELETE /api/admin/tasks/:id
-// @desc    Delete any task (admin only)
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /api/admin/tasks/{id}:
+ *   delete:
+ *     summary: Delete any task by ID (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task ID
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Task not found
+ */
+
 adminRoutes.delete(
   "/tasks/:id",
   asyncHandler(async (req, res) => {
