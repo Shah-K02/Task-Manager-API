@@ -152,7 +152,7 @@ This documentation provides detailed information on all endpoints, including req
 
 Use the Swagger UI to explore and test the API interactively.
 
-To add or update the documentation, modify the JSDoc-style Swagger annotations in the respective route files (for example: routes/tasks.js, routes/auth.js).
+To add or update the documentation, modify the JSDoc-style Swagger annotations in the respective route files (for example: `routes/tasks.js`, `routes/auth.js`).
 
 ## 🗂️ Project Structure
 
